@@ -5,14 +5,7 @@ mongoose.connect(dbURI);
 var db = mongoose.connection;
 var InspectionCriteria;
 
-exports.openConnection = function openConnection (request, response) {	
-	console.log('Reached mongo open connection');
-	console.log(request.params);
-	response.send(200, JSON.stringify(request.params));
-
-	console.log('Connection Successful');		
-	var mongoose = require('mongoose');
-	var inspectionCriteriaSchema = mongoose.Schema( 
+var inspectionCriteriaSchema = mongoose.Schema( 
 	{ 
 		type :
 		{
@@ -20,11 +13,10 @@ exports.openConnection = function openConnection (request, response) {
 			part :
 			{
 				partName : String,
-				options : Array
+				options : String
 			}
 		}
 	});
-};
 
 //Save the details to Mongo
 exports.saveToMongo = function saveToMongo(inspectionDetail)
@@ -43,19 +35,21 @@ exports.saveToMongo = function saveToMongo(inspectionDetail)
 
 //Add the criteria to the mongo database.  Gets typeName - string,
 //partName - string, and options - string
-exports.addCriteria = function addCriteria () {
+exports.addCriteria = function addCriteria (request, response) {
+	response.send(200, JSON.stringify(request.params));
+
 	db.on('error', console.error.bind(console, 'connection error:'));
 
-	db.once('open', function callback (typeName, partName, option) 
+	db.once('open', function callback () 
 	{
 		var inspectionDetail = new InspectionCriteria({ 
 			type :
 			{
-				typeName : typeName,
+				typeName : request.body.typeName,
 				part :
 				{
-					partName : partName,
-					options : option
+					partName : request.body.partName,
+					options : request.body.option
 				}
 			}
 		}); 
@@ -64,3 +58,10 @@ exports.addCriteria = function addCriteria () {
 
 };
 
+exports.getData = function getData (request, response) {
+	debugger;
+	var body = "hello world";
+	response.setHeader('Content-Type', 'text/plain');
+	response.setHeader('Content-Length', body.length);
+	response.end(body);
+}

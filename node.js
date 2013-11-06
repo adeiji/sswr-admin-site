@@ -6,9 +6,15 @@ function start ()
 	var app = express();
 	var mongo = require("./mongo");
 
-	app.post('/mongo', mongo.openConnection);
-	app.use(express.static(__dirname));	
+	app.configure(function () {
+		app.use(express.bodyParser());
+		app.use(app.router);
+		app.use(express.logger());
+	});
 
+	app.post('/mongo', mongo.addCriteria);
+	app.get('/mongo', mongo.getData);
+	app.use(express.static(__dirname));	
 	app.listen(process.env.PORT || 8080);
 };
 
