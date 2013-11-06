@@ -3,7 +3,9 @@ var mongoose = require('mongoose');
 var dbURI = 'mongodb://localhost/test';
 mongoose.connect(dbURI);
 var db = mongoose.connection;
-var InspectionCriteria;
+
+console.log('Connected to port : ' + mongoose.connection.port);
+console.log('Connected to host : ' + mongoose.connection.host);
 
 var inspectionCriteriaSchema = mongoose.Schema( 
 	{ 
@@ -18,6 +20,7 @@ var inspectionCriteriaSchema = mongoose.Schema(
 		}
 	});
 
+var InspectionCriteria = mongoose.model('InspectionCriteria', inspectionCriteriaSchema);
 //Save the details to Mongo
 exports.saveToMongo = function saveToMongo(inspectionDetail)
 {
@@ -59,9 +62,16 @@ exports.addCriteria = function addCriteria (request, response) {
 };
 
 exports.getData = function getData (request, response) {
-	debugger;
-	var body = "hello world";
-	response.setHeader('Content-Type', 'text/plain');
-	response.setHeader('Content-Length', body.length);
-	response.end(body);
+	InspectionCriteria.find( { "type.typeName" : "Trolley" }, 
+		function (err, docs) 
+		{
+			var body = JSON.stringify(docs);
+			body.response = response;
+			response.setHeader('Content-Type', 'application/json');
+			response.setHeader('Content-Length',body.length);
+			response.write(body);
+			response.end();
+			debugger;
+		 });
+
 }

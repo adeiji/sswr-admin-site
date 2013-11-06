@@ -23,10 +23,11 @@ $( document ).ready(function () {
     	var response = $.ajax({
     		url: "/mongo", 
     		type: "GET", 
+    		dataType : "json",
     		success: 
     			function onSuccess(response)
 	    		{
-	    			alert(response + ": received data");
+	    			alert(JSON.stringify(response) + ": received data");
 	    		},
     		error: 
 	    		function onError () {
