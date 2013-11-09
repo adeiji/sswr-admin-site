@@ -9,7 +9,6 @@ function start ()
 	app.configure(function () {
 		app.use(express.bodyParser());
 		app.use(app.router);
-		app.use(express.logger());
 	});
 
 	app.post('/mongo', mongo.addCriteria);

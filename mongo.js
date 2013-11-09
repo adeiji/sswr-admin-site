@@ -15,7 +15,7 @@ var inspectionCriteriaSchema = mongoose.Schema(
 			part :
 			{
 				partName : String,
-				options : String
+				options : []
 			}
 		}
 	});
@@ -38,11 +38,12 @@ exports.saveToMongo = function saveToMongo(inspectionDetail)
 
 //Add the criteria to the mongo database.  Gets typeName - string,
 //partName - string, and options - string
-exports.addCriteria = function addCriteria (request, response) {
+exports.addCriteria = function addCriteria (request, response) 
+{
 	response.send(200, JSON.stringify(request.params));
-
+	
 	db.on('error', console.error.bind(console, 'connection error:'));
-
+	
 	db.once('open', function callback () 
 	{
 		var inspectionDetail = new InspectionCriteria({ 
@@ -52,10 +53,12 @@ exports.addCriteria = function addCriteria (request, response) {
 				part :
 				{
 					partName : request.body.partName,
-					options : request.body.option
+					options : request.body.options
 				}
 			}
 		}); 
+		debugger;
+		console.log("Opened Connection");
 		saveToMongo(inspectionDetail);
 	});
 
