@@ -200,7 +200,7 @@ exports.getData = function getData (request, response) {
 	InspectionCriteria.find( request.query, 
 		function (err, docs) 
 		{
-			var body = JSON.stringify(docs);
+			var body = JSON.stringify(docs);			
 			body.response = response;
 			response.setHeader('Content-Type', 'application/json');
 			response.setHeader('Content-Length',body.length);

@@ -26,7 +26,7 @@ $(document).ready( function () {
     		}
 	});
 
-	function getSubDocuments (criteria, level) {
+	function getSubDocuments (criteria, level, selectedPart) {
 		dataId ++ ;
 		optionNum ++;
 		var result = null;
@@ -39,15 +39,24 @@ $(document).ready( function () {
 			success: function onSuccess (response) {
 				if (level == 2)
 				{
-					for (var i = 0; i < response.length; i++) {					
-						partName = response[i].type.part.partName;
-
-						$("#box" + level + "View").append("<option value='" + optionNum + "'>" + partName + "</option>");
+					for (var i = 0; i < response.length; i++) {		
+						for (var j = 0; j < response[i].type.part.length; j++) {
+							partName = response[i].type.part[j].partName;
+							optionNum ++ ;
+							$("#box" + level + "View").append("<option value='" + optionNum + "'>" + partName + "</option>");
+						};
 					};
 				}
 				if (level == 3)
 				{
-					optionList = response[0].type.part.options;
+					var partToSearch;
+					for (var i = 0; i < response[0].type.part.length; i++) {
+						if (response[0].type.part[i].partName == selectedPart)
+						{
+							optionList = response[0].type.part[i].optionList;
+						}
+					};
+
 					for (var i = 0; i < optionList.length; i++) {
 						$("#box" + level + "View").append("<option value='" + optionNum + "'>" + optionList[i] + "</option>");
 					};
@@ -134,7 +143,7 @@ $(document).ready( function () {
 
 		var craneSpec = getSubDocuments({		
 			"type.part.partName" 	: partName
-		}, 3);
+		}, 3, partName);
 	});
 
 	$('select[level="3"').change(function addToList () {
