@@ -13,6 +13,7 @@ function start ()
 
 	app.post('/mongo', mongo.addCriteria);
 	app.get('/mongo', mongo.getData);
+	app.post('/mongo/update', mongo.update);
 	app.use(express.static(__dirname));	
 	app.listen(process.env.PORT || 8080);
 };

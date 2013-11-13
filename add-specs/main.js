@@ -1,25 +1,66 @@
 var options = [];
 var optionNum = 204878
 var optionCounter = 3;
+var dataId = 1;
 
 $(document).ready( function () {
 	var response = $.ajax({
 		url: "/mongo", 
-		type: "GET", 
+		type: "GET",
 		dataType : "json",
-		success: function onSuccess (response) {  			
-			var typeName = response[0].type.typeName;
-			var part = response[0].type.part.partName;
-			var option = response[0].type.part.options.split(',');
+		success: function onSuccess (response) { 			
+			var typeName;
+			var partName;
+			var optionList = [];
 
-			$("#box1View").append("<option value='501649'>" + option[0] + "</option>");
-			$("#box1View").append("<option value='501648'>" + option[1] + "</option>");
+			for (var i = 0; i < response.length; i++) {
+				typeName = response[i].type.typeName;
+
+				$("#box1View").append("<option value='501649'>" + typeName + "</option>");
+			};
+
 	},
 		error: 
     		function onError () {
     			alert('failed to get data');
     		}
 	});
+
+	function getSubDocuments (criteria, level) {
+		dataId ++ ;
+		optionNum ++;
+		var result = null;
+
+		$.ajax({
+			url: "/mongo", 
+			type: "GET", 
+			data: criteria,
+			dataType : "json",
+			success: function onSuccess (response) {
+				if (level == 2)
+				{
+					for (var i = 0; i < response.length; i++) {					
+						partName = response[i].type.part.partName;
+
+						$("#box" + level + "View").append("<option value='" + optionNum + "'>" + partName + "</option>");
+					};
+				}
+				if (level == 3)
+				{
+					optionList = response[0].type.part.options;
+					for (var i = 0; i < optionList.length; i++) {
+						$("#box" + level + "View").append("<option value='" + optionNum + "'>" + optionList[i] + "</option>");
+					};
+				}	
+			},
+			error:
+				function onError () {
+					alert("Failed to get data");
+				}
+		});
+
+		return result;
+	};
 
 	$("#addType1").click(function () {
 		optionNum = optionNum + 1;
@@ -57,6 +98,8 @@ $(document).ready( function () {
 	$('select[level="1"').change(function () {
 		//We need to remove everything from this div so that we make sure that we only contain one level here at a time.
 		$('#nestable_list_1').empty();
+		$('#box2View').empty();
+		$('#box3View').empty();
 		//Get the typename from the select list and then store that type name in the div typeName attribute.
 		var typeName = $('select[level="1"] option:selected').text();
 		//Append the selected item from the selected BoxView to the list
@@ -68,12 +111,17 @@ $(document).ready( function () {
 						'</ol>' +					
 					'</li>' +
     			'</ol>');
+
+		//Check to see if there's any parts attributed to this Type
+		var craneSpec = getSubDocuments({		
+			"type.typeName" 	: typeName
+		}, 2);
 	});
 	//When the part is selected
 	$('select[level="2"').change(function () {
 		//We need to remove everything from this div so that we make sure that we only contain one level here at a time.
-		$('ol[level="1"]').empty();		
-
+		$('ol[level="1"]').empty();	
+		$('#box3View').empty();	
 		//Get the part name from the select list and then store that type name in the div partName attribute.
 		partName = $('select[level="2"] option:selected').text();
 		//Append the selected item from the selected BoxView to the list
@@ -83,6 +131,10 @@ $(document).ready( function () {
 				'<ol class="dd-list" level="2">' +
 				'</ol>' +
 			'</li>');
+
+		var craneSpec = getSubDocuments({		
+			"type.part.partName" 	: partName
+		}, 3);
 	});
 
 	$('select[level="3"').change(function addToList () {
@@ -115,15 +167,17 @@ $(document).ready( function () {
 
 		function sendRequest (typeName, partName, optionsToAdd) {
 			var request = $.ajax({
-		        url: "/mongo",
-		        async: false,
+		        url: "/mongo/update",
+		        async: true,
 		        type: "POST",
 		        data: JSON.stringify(
 		        	{ 
-		        		details : {
+		        		type : {
 		        			typeName 	: typeName,
-		        			partName 	: partName,
-		        			options 	: optionsToAdd
+		        			part : {
+		        				partName 	: partName,
+		        				optionList 	: optionsToAdd
+		        			}
 		        		} 
 		        	}),
 		        contentType: "application/json",
